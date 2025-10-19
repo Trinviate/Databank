@@ -13,6 +13,38 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        
+        //
+        builder.HasKey(x => x.UserId);
+
+
+        builder.Property(x => x.UserId)
+        .HasDefaultValueSql("gen_random_uuid()")
+        .ValueGeneratedOnAdd();
+
+        builder.Property(n => n.Username)
+        .IsRequired()
+        .HasMaxLength(20);
+
+        builder.Property(n => n.Password)
+        .IsRequired()
+        .HasMaxLength(250);
+
+        builder.Property(n => n.FirstName)
+        .IsRequired()
+        .HasMaxLength(100);
+
+        builder.Property(n => n.LastName)
+        .IsRequired()
+        .HasMaxLength(100);
+
+        builder.Property(n => n.Department)
+        .IsRequired();
+
+        builder.Property(d => d.CreatedAt)
+        .HasDefaultValueSql("current_date");
+
+        builder.Property(d => d.UpdatedAt)
+        .ValueGeneratedOnAddOrUpdate()
+        .HasDefaultValueSql("current_date");
     }
 }
