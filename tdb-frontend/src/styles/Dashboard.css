@@ -52,16 +52,6 @@
   color: #E5E5E5;
 }
 
-.navbar.dark .nav-item,
-.navbar.dark .dropdown-btn {
-  color: #E5E5E5;
-}
-
-.navbar.dark .nav-item:hover,
-.navbar.dark .dropdown-btn:hover {
-  color: #1C4DA1;
-}
-
 /* Navbar Left */
 .nav-left .logo {
   width: 120px;
@@ -123,7 +113,7 @@
   vertical-align: middle;
 }
 
-/* Hover and active state */
+/* Hover and active state (Standardized) */
 .nav-center .nav-item:hover,
 .nav-center .dropdown-btn:hover {
   background-color: #FFC63E;
@@ -136,6 +126,17 @@
   background-color: #FFC63E;
   color: #1C4DA1;
 }
+
+.navbar.dark .nav-center .nav-item,
+.navbar.dark .nav-center .dropdown-btn {
+  color: #E5E5E5;
+}
+
+.navbar.dark .nav-center .nav-item:hover,
+.navbar.dark .nav-center .dropdown-btn:hover {
+  color: #1C4DA1;
+}
+/* END Hover/Active Standardization */
 
 .dropdown-nav-item {
   position: relative;
@@ -168,15 +169,8 @@
 
 .dropdown-menu-item:hover {
   background: #FFD066; /* darker yellow */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 6px; /* optional: soften edges */
-}
-
-/* Nav icons small */
-.nav-icon {
-  width: 18px;
-  height: 18px;
-  display: inline-block;
+  /* box-shadow removed for consistency */
+  /* border-radius removed for consistency */
 }
 
 /* Right side */
@@ -243,7 +237,7 @@
 }
 
 .dashboard.dark .user-dropdown {
-  background: #0f1724;
+  background: #1e293b; /* Consistent dark background */
   color: #E5E5E5;
 }
 
@@ -270,11 +264,6 @@
   color: #1C4DA1;
 }
 
-.dashboard.dark .user-dropdown {
-  background: #1e293b;
-  color: #fff;
-}
-
 .dashboard.dark .user-dropdown button {
   color: #fff;
 }
@@ -284,15 +273,16 @@
   color: #1C4DA1;
 }
 
-.dashboard.dark .user-dropdown .logout-btn {
-  color: #ff4d4f; /* red shade for dark mode */
-  font-weight: 700;
-}
-
 .logout-btn {
+  /* Using red only for the log out text in the menu */
   color: #c0392b;
   font-weight: 700;
 }
+
+.dashboard.dark .user-dropdown .logout-btn {
+  color: #ff4d4f; 
+}
+
 
 /* Mode switch (oblong toggle) */
 .mode-switch {
@@ -326,23 +316,6 @@
 .mode-switch.dark .circle {
   transform: translateX(32px);
   background: #fff;
-}
-
-.mode-switch svg {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #1C4DA1;
-}
-
-.mode-switch.dark svg.sun-icon {
-  left: 6px;
-}
-
-.mode-switch.dark svg.moon-icon {
-  right: 6px;
 }
 
 /* Main card */
@@ -419,12 +392,12 @@
 .search-bar .search-icon {
   position: absolute;
   right: 1rem;
-  top: 30%;
+  top: 30%; /* Center vertically */
   transform: translateY(-50%);
   color: #888;
   width: 18px;
   height: 18px;
-  cursor: pointer;
+  cursor: default; /* Changed from pointer to default */
 }
 
 /* View toggle buttons */
@@ -458,6 +431,14 @@
   background-color: rgba(255,198,62,0.2);
 }
 
+.dashboard.dark .view-toggle button {
+  color: #E5E5E5;
+}
+
+.dashboard.dark .view-toggle button:hover {
+  background-color: rgba(255,198,62,0.2);
+}
+
 /* Programs */
 .program-grid {
   display: flex;
@@ -487,12 +468,6 @@
   color: #E5E5E5;
 }
 
-.dashboard.dark .program-card:hover {
-  background-color: #1C2B45; /* slightly lighter dark */
-  border-color: #FFC63E;
-  box-shadow: 0 8px 24px rgba(255,198,62,0.3); /* subtle yellow glow */
-}
-
 .program-card img {
   width: 220px;
   height: 220px;
@@ -511,6 +486,12 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   border-color: #FFC63E;
   transform: translateY(-4px);
+}
+
+.dashboard.dark .program-card:hover {
+  background-color: #1C2B45; /* slightly lighter dark */
+  border-color: #FFC63E;
+  box-shadow: 0 8px 24px rgba(255,198,62,0.3); /* subtle yellow glow */
 }
 
 .program-list .program-list-item {
@@ -545,81 +526,107 @@
   color: #FFC63E; /* text changes to yellow on hover */
 }
 
-/* Logout modal */
+/* --- Logout Modal Styles (Standardized from TestEncodingAndEditing) --- */
+
 .logout-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; 
 }
 
 .logout-modal {
-  background: white;
-  padding: 1.2rem;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 360px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-  color: inherit;
+    background: white;
+    padding: 2rem;
+    border-radius: 15px; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transition: background 0.3s;
+    color: #3B3B3B;
 }
 
-.dashboard.dark .logout-modal {
-  background: #0f1724;
-  color: #E5E5E5;
+.logout-modal.dark {
+    background: #1e293b; 
+    color: #E5E5E5;
 }
 
 .logout-modal h2 {
-  margin-bottom: 0.4rem;
-  color: inherit;
+    color: #1C4DA1;
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.logout-modal.dark h2 {
+    color: #FFC63E;
+}
+
+.logout-modal p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
 }
 
 .logout-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.logout-actions button {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.1s;
+    font-size: 1rem;
 }
 
 .btn-cancel {
-  padding: 0.5rem 0.9rem;
-  border: 1px solid #cbd5e1;
-  background: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+    background: #e9ecef;
+    color: #3B3B3B;
+    border: none;
 }
 
 .btn-cancel:hover {
-  background: #FFC63E;
-  color: #1C4DA1;
+    background: #FFC63E;
+    color: #1C4DA1;
 }
 
 .btn-confirm {
-  padding: 0.5rem 0.9rem;
-  background: #1C4DA1;
-  color: white;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
+    background: #1C4DA1; 
+    color: white;
 }
 
 .btn-confirm:hover {
-  background: #FFC63E;
-  color: #1C4DA1;
+    background: #153a81;
+    transform: translateY(-1px);
 }
 
-.dashboard.dark .btn-cancel {
-  color: #fff;
-  border-color: #555;
+.logout-modal.dark .btn-cancel {
+    background: #334155;
+    color: #E5E5E5;
 }
 
-.dashboard.dark .btn-cancel:hover {
-  background: #FFC63E;
-  color: #1C4DA1;
+.logout-modal.dark .btn-cancel:hover {
+    background: #FFC63E;
+    color: #1C4DA1;
+}
+
+.logout-modal.dark .btn-confirm {
+    background: #1C4DA1;
+    color: white;
+}
+
+.logout-modal.dark .btn-confirm:hover {
+    background: #153a81;
 }
 
 /* Small screens */
