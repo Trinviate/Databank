@@ -25,6 +25,26 @@
     --bloom-color-3: #ffc107;
 
     --nav-height: 5rem;
+    
+    /* --- CRITICAL ADDITIONS FOR NEW STYLES --- */
+    --primary-color: #1C4DA1; /* Main blue color */
+    --secondary-color: #FFC63E; /* Main yellow color */
+    --primary-light-color: #f0f4f8; /* Light background for primary boxes */
+    --secondary-light-color: #e9ecef; /* Light background for secondary boxes */
+    --border-color: #d1d5db; /* General border color */
+    --background-light: #f8f9fa; /* Light background */
+    --background-hover: #e9ecef; /* Light hover color */
+    --text-color-secondary: #6c757d; /* Secondary text color */
+    --color-blue: #007bff; /* Action blue */
+    --color-red: #dc3545; /* Action red */
+
+    /* Dark Mode variables for new styles */
+    --dark-primary-color: #4A90E2;
+    --dark-border-color: #263244;
+    --dark-background-light: #1e293b;
+    --dark-background-hover: #14202b;
+    --dark-primary-dark: #0f172a;
+    --text-color-secondary-dark: #94a3b8;
 }
 
 /* Dark Mode Transition */
@@ -539,8 +559,8 @@
 }
 
 .dept-logo {
-    height: 130px;
-    width: 130px;
+    height: 160px;
+    width: 160px;
     object-fit: contain;
 }
 
@@ -567,6 +587,13 @@
     padding: 1rem 0;
     border-radius: 10px;
 }
+
+/* 🚀 NEW: Two-column filter specifically for the Editing View (Subject & Topic) */
+.selection-fields.two-col-filter {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
 
 .selection-fields .input-group,
 .selection-fields .input-group-topic {
@@ -887,7 +914,9 @@
 /* Answer Key Section */
 .answer-key-section {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    /* --- MODIFIED FOR VERTICAL ALIGNMENT --- */
+    grid-template-columns: 1fr; 
+    /* --- END MODIFIED --- */
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -1063,12 +1092,12 @@
 
 
 /* ======================================= */
-/* III. NEW MATH SYMBOL PICKER STYLES (REWORKED) */
+/* III. NEW MATH SYMBOL PICKER STYLES (CLEANED AND FIXED) */
 /* ======================================= */
 
 .math-symbol-picker {
     position: fixed;
-    z-index: 2000; /* Increased z-index to ensure it sits above all other elements */
+    z-index: 2000; /* High z-index is correct */
     width: 280px;
     background-color: white;
     border: 1px solid #ccc;
@@ -1076,11 +1105,9 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    display: none;
-}
-
-.math-symbol-picker.show {
-    display: block;
+    /* FIX: Ensure it is visible when component is rendered by React */
+    display: flex;
+    flex-direction: column;
 }
 
 /* Dark Mode support for Picker */
@@ -1313,4 +1340,187 @@
 
 .dashboard.dark .section-separator {
     background-color: #263244;
+}
+
+/* --- Styles for the Editing View (Test Question Editing) --- */
+
+.editing-view-container {
+    padding: 20px 0;
+}
+
+/* REMOVED: .editing-list-heading to use the styled .filter-display-box instead. */
+
+/* 🚀 NEW/UPDATED: Filter Prompt (Used when selection is incomplete) */
+.filter-prompt {
+    padding: 40px;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    background-color: var(--background-light);
+    text-align: center;
+    color: var(--text-color-secondary);
+    font-size: 1.1rem;
+    font-style: italic;
+    margin: 40px 0;
+}
+.dark .filter-prompt {
+    border-color: var(--dark-border-color);
+    background-color: var(--dark-background-light);
+    color: var(--text-color-secondary-dark);
+}
+
+/* --- Filter Display Box (The main heading for Subject/Topic in Editing View) --- */
+.filter-display-box {
+    background-color: var(--primary-light-color); 
+    color: var(--primary-color); 
+    padding: 12px 20px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    display: inline-block; 
+    border: 1px solid var(--primary-color);
+}
+
+.dark .filter-display-box {
+    background-color: var(--dark-primary-dark);
+    color: var(--primary-light-color);
+    border: 1px solid var(--dark-border-color);
+}
+
+/* --- Type Display Box (The styled box for the Bloom's Level subheader) --- */
+.type-display-box {
+    background-color: var(--secondary-light-color); 
+    color: var(--primary-color);
+    padding: 8px 15px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    display: inline-block;
+    border: 1px solid var(--secondary-color);
+}
+
+.dark .type-display-box {
+    background-color: var(--dark-background-hover);
+    color: var(--primary-light-color);
+    border: 1px solid var(--dark-border-color);
+}
+
+/* ======================================= */
+/* ======== EDITING LIST GROUPING ======== */
+/* ======================================= */
+
+.question-group-section {
+    margin-top: 15px;
+    margin-bottom: 25px;
+}
+
+/* --- Question Type Subheader (Now just a container for type-display-box) --- */
+.question-type-subheader {
+    color: var(--text-color);
+    padding: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+    border-bottom: none;
+}
+
+.question-type-subheader .question-count {
+    font-weight: 400;
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+}
+
+.dark .question-type-subheader .question-count {
+    color: var(--text-color-secondary-dark);
+}
+
+/* --- Table Container (Holds the border and overflow) --- */
+.question-group-section .history-table-container {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.dark .question-group-section .history-table-container {
+    border-color: var(--dark-border-color);
+}
+
+/* Remove padding from the list wrapper */
+.question-group-section .question-editing-list {
+    padding: 0;
+}
+
+/* ======================================= */
+/* ============ TABLE STYLING ============ */
+/* ======================================= */
+
+/* Adjust table in editing view */
+.question-editing-list .history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.question-editing-list .history-table th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.question-editing-list .history-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+}
+
+.question-editing-list .history-table .no-data {
+    text-align: center;
+    padding: 30px 15px;
+    font-style: italic;
+    color: var(--text-color-secondary);
+}
+
+/* Ensure actions column is narrow */
+.question-editing-list .history-table th:last-child,
+.question-editing-list .history-table td:last-child {
+    width: 100px;
+    text-align: center;
+}
+
+/* --- Action Buttons --- */
+.question-editing-list .actions-cell button {
+    margin: 0 5px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.question-editing-list .action-edit { color: var(--color-blue); }
+.question-editing-list .action-delete { color: var(--color-red); }
+
+.question-editing-list .actions-cell button:hover {
+    background-color: var(--background-hover);
+}
+
+/* ======================================= */
+/* ========== DARK MODE ADJUSTMENTS ====== */
+/* ======================================= */
+
+/* Redundant but kept for safety with older code:
+.dark .editing-list-heading {
+    color: var(--text-color);
+    border-bottom-color: var(--dark-border-color);
+}
+*/
+.dark .question-editing-list .history-table th {
+    background-color: var(--dark-primary-color);
+}
+.dark .question-editing-list .history-table td {
+    border-bottom-color: var(--dark-border-color);
+}
+.dark .question-editing-list .actions-cell button:hover {
+    background-color: var(--dark-background-hover);
 }
