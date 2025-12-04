@@ -1560,3 +1560,67 @@
     /* Ensure text color remains red/danger on hover in dark mode */
     color: var(--color-red, #dc3545); 
 }
+
+/* ======================================= */
+/* VII. EDITING VIEW FORM STYLES (NEW) */
+/* ======================================= */
+
+/* Ensures the header for the editing form is clean */
+.editing-form-section .form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-light);
+}
+
+/* Base style for the Cancel Edit button */
+.btn-cancel-edit {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s, color 0.2s;
+    
+    /* LIGHT MODE STYLES */
+    background-color: transparent;
+    color: var(--color-danger); /* Red color for caution/cancel */
+    border: 1px solid var(--color-danger);
+}
+
+.btn-cancel-edit:hover {
+    background-color: rgba(220, 53, 69, 0.1); /* Light red background on hover */
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+/* Dark Mode Overrides for Cancel Edit button */
+.dashboard.dark .editing-form-section .form-header {
+    border-bottom-color: var(--dark-border-color);
+}
+
+.dashboard.dark .btn-cancel-edit {
+    background-color: transparent;
+    color: #ff8c94; /* Lighter red for dark mode contrast */
+    border: 1px solid #ff8c94;
+}
+
+.dashboard.dark .btn-cancel-edit:hover {
+    background-color: rgba(255, 140, 148, 0.1); /* Light red background on hover */
+    color: #ff8c94;
+}
+
+/* Ensure the full width placeholder for type filter is centered */
+.editing-form-type-filter {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.editing-form-type-filter .input-group {
+    width: 60%; /* Limit width for aesthetics */
+}

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
     Home, ClipboardList, BookOpen, Settings, LogOut, User, Sun, Moon, Search, 
-    FileText, Plus, Edit2, Trash2, Save,
+    FileText, Plus, Edit2, Trash2, Save, X, 
     Bold, Italic, Underline, Link, List, ListOrdered, Sigma, Image, Edit, 
     Heading1, Heading2,
 } from 'lucide-react';
@@ -217,7 +217,6 @@ const TestEncodingAndEditing = () => {
 
     const [subject, setSubject] = useState("");
     const [topicDescription, setTopicDescription] = useState("");
-    // questionType is kept for encoding the type of a NEW/EDITED question
     const [questionType, setQuestionType] = useState(""); 
 
     // State for Rich Text Editor
@@ -247,7 +246,8 @@ const TestEncodingAndEditing = () => {
     const [explanation, setExplanation] = useState('');
     const [correctAnswer, setCorrectAnswer] = useState(''); 
 
-    const [editingQuestion, setEditingQuestion] = useState(null); 
+    const [editingQuestion, setEditingQuestion] = useState(null); // Used for Encoding Tab
+    const [editingQuestionInEditingTab, setEditingQuestionInEditingTab] = useState(null); // Used for Editing Tab
     
 
     // --- Effects & Handlers ---
@@ -262,6 +262,7 @@ const TestEncodingAndEditing = () => {
         setExplanation('');
         setCorrectAnswer(''); 
         setEditingQuestion(null);
+        setEditingQuestionInEditingTab(null); 
         
         // Clear contentEditable divs visually
         document.querySelectorAll('.content-editable-area').forEach(el => el.innerHTML = '');
@@ -271,15 +272,10 @@ const TestEncodingAndEditing = () => {
 
     const handleSetActiveTab = (item) => {
         if (item !== activeTab) {
-            // Note: Filters (subject/topic) are retained if user clicks 'Add Question'
-            // but are cleared when switching to a different section (e.g., Reports, Home)
-            // or if the tab requires clean state (like the previous Encoding/Editing refactoring).
-            // For now, let's keep the filter reset logic simple on tab switch:
             if (!dataEntryItems.includes(item)) {
                 setSubject('');
                 setTopicDescription('');
             }
-            // Always reset encoding/editing state on tab switch
             setQuestionType(''); 
             resetInputContent();
         }
@@ -368,6 +364,8 @@ const TestEncodingAndEditing = () => {
     const getToolbarActiveCommands = (setter) => {
         return activeSetterRef.current === setter ? activeCommands : {};
     };
+
+    const handleContentChange = (e, setter) => { setter(e.target.innerHTML); };
 
     const handleFormat = (type, command, value) => { 
         if (type === 'openPicker' && command === 'math') { 
@@ -515,7 +513,6 @@ const TestEncodingAndEditing = () => {
     };
 
 
-    const handleContentChange = (e, setter) => { setter(e.target.innerHTML); };
     
     // Loads question data into input fields
     const handleEditQuestion = (question) => {
@@ -526,17 +523,20 @@ const TestEncodingAndEditing = () => {
         // Clear content state first to prevent brief flicker/mixup
         resetInputContent(); 
         
-        // FIX: Switch to the 'Test Question Encoding' tab, as this contains the actual
-        // input form for modifying the question content.
-        handleSetActiveTab('Test Question Encoding'); 
+        // Determine where to set the editing context
+        if (activeTab === 'Test Question Editing') {
+            // Set the local editing state for the Editing tab, and DO NOT switch tabs
+            setEditingQuestionInEditingTab(question); 
+        } else {
+            // If in Encoding, switch to Encoding tab (this is the original functionality)
+            handleSetActiveTab('Test Question Encoding'); 
+            setEditingQuestion(question);
+        }
         
-        // Set the question object currently being edited
-        setEditingQuestion(question); 
-        
-        // Populate the filter/type fields for the Encoding View
+        // Populate the filter/type fields for the input form
         setSubject(currentSubject);
         setTopicDescription(currentTopic);
-        setQuestionType(question.type); // Set cognitive level for the input field
+        setQuestionType(question.type); 
         
         // Populate the content fields with the question data
         setQuestionText(question.text); 
@@ -556,11 +556,14 @@ const TestEncodingAndEditing = () => {
             return; 
         }
 
+        // Determine the editing context
+        const editingContext = editingQuestion || editingQuestionInEditingTab; 
+        const wasEditing = !!editingContext; 
+        
         // Preserve current filter values
         const currentSubject = subject;
         const currentTopic = topicDescription;
         const currentType = questionType;
-        const wasEditing = !!editingQuestion; 
 
         // 2. Create the new question object / Updated object
         const newQ = { 
@@ -574,7 +577,7 @@ const TestEncodingAndEditing = () => {
             subject: currentSubject, 
             topic: currentTopic,     
             type: currentType, 
-            id: editingQuestion ? editingQuestion.id : Date.now() 
+            id: editingContext ? editingContext.id : Date.now() 
         };
         
         let updatedQuestions;
@@ -582,9 +585,9 @@ const TestEncodingAndEditing = () => {
 
         if (wasEditing) {
             updatedQuestions = questions.map(q => 
-                q.id === editingQuestion.id ? newQ : q
+                q.id === editingContext.id ? newQ : q
             );
-            alertMessage = `Question ID ${editingQuestion.id} saved successfully!`;
+            alertMessage = `Question ID ${editingContext.id} saved successfully!`;
         } else {
             updatedQuestions = [...questions, newQ];
             alertMessage = `Question added successfully!`;
@@ -600,10 +603,31 @@ const TestEncodingAndEditing = () => {
         setTopicDescription(currentTopic);
         setQuestionType(currentType); 
         
-        // 5. Ensure we are in the Encoding tab to show the new history
-        setActiveTab('Test Question Encoding'); 
-        
         alert(alertMessage);
+    };
+
+    // --- New Handler for Deletion ---
+    const handleDeleteQuestion = (questionId) => {
+        // 1. Confirmation Dialog
+        const confirmDelete = window.confirm(
+            `Are you sure you want to delete Question ID: ${questionId}? This action cannot be undone.`
+        );
+
+        if (confirmDelete) {
+            // 2. Filter the questions array to remove the item with the matching ID
+            const updatedQuestions = questions.filter(q => q.id !== questionId);
+            
+            setQuestions(updatedQuestions);
+            
+            // 3. Check if the deleted question was the one currently being edited
+            const editingContext = editingQuestion || editingQuestionInEditingTab;
+
+            if (editingContext && editingContext.id === questionId) {
+                resetInputContent(); // Clear the form if the deleted question was active
+            }
+
+            alert(`Question ID ${questionId} successfully deleted.`);
+        }
     };
     
     // Filtering based ONLY on Subject and Topic
@@ -893,10 +917,17 @@ const TestEncodingAndEditing = () => {
                                                                         <button 
                                                                             className="action-edit" 
                                                                             title="Edit" 
+                                                                            // Uses the unified handler
                                                                             onClick={() => handleEditQuestion(q)}>
                                                                             <Edit2 size={16} />
                                                                         </button>
-                                                                        <button className="action-delete" title="Delete" onClick={() => alert(`Delete QID: ${q.id}`)}><Trash2 size={16} /></button>
+                                                                        <button 
+                                                                            className="action-delete" 
+                                                                            title="Delete" 
+                                                                            // 💥 UPDATED CALL 💥
+                                                                            onClick={() => handleDeleteQuestion(q.id)}>
+                                                                            <Trash2 size={16} />
+                                                                        </button>
                                                                     </td>
                                                                 </tr>
                                                             ))}
@@ -918,7 +949,7 @@ const TestEncodingAndEditing = () => {
                     {/* ###################################################### */}
                     {activeTab === 'Test Question Editing' && (
                         <div className="editing-view-container">
-                            {/* 🎯 2. 2-COLUMN SELECTION FIELDS for FILTERING (Subject, Topic ONLY) 🎯 */}
+                            {/* 🎯 2-COLUMN SELECTION FIELDS for FILTERING (Subject, Topic ONLY) 🎯 */}
                             <div className="selection-fields two-col-filter filter-block-top">
                                 <div className="input-group">
                                     <label htmlFor="subject">Subject</label>
@@ -976,7 +1007,13 @@ const TestEncodingAndEditing = () => {
                                                                                 onClick={() => handleEditQuestion(q)}>
                                                                                 <Edit2 size={16} />
                                                                             </button>
-                                                                            <button className="action-delete" title="Delete" onClick={() => alert(`Delete QID: ${q.id}`)}><Trash2 size={16} /></button>
+                                                                            <button 
+                                                                                className="action-delete" 
+                                                                                title="Delete" 
+                                                                                // 💥 UPDATED CALL 💥
+                                                                                onClick={() => handleDeleteQuestion(q.id)}>
+                                                                                <Trash2 size={16} />
+                                                                            </button>
                                                                         </td>
                                                                     </tr>
                                                                 ))}
@@ -986,6 +1023,115 @@ const TestEncodingAndEditing = () => {
                                                 </div>
                                             </div>
                                         ))
+                                    )}
+
+                                    {/* --- 💥 Editing Form Display Section 💥 --- */}
+                                    {editingQuestionInEditingTab && (
+                                        <div className="editing-form-section">
+                                            <hr className="section-separator double-line" />
+                                            <h3 className="editing-list-heading form-header">
+                                                <Edit2 size={24} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
+                                                Editing Question ID: **{editingQuestionInEditingTab.id}**
+                                                <button className="btn-cancel-edit" onClick={resetInputContent}>
+                                                    <X size={20} /> Cancel Edit
+                                                </button>
+                                            </h3>
+
+                                            {/* Type of Question (Cognitive Level) - Required for saving, but filters are locked */}
+                                            <div className="selection-fields encoding-filter-block editing-form-type-filter">
+                                                <div className="input-group full-width-placeholder">
+                                                    <label htmlFor="questionType">Type of Question (Cognitive Level)</label>
+                                                    <select id="questionType" value={questionType} onChange={e=>setQuestionType(e.target.value)}>
+                                                        <option value="" disabled>Select Cognitive Level</option>
+                                                        {MOCK_QUESTION_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Question Block - Reused from Encoding Tab */}
+                                            <div className="question-block">
+                                                <label><FileText size={20} style={{ verticalAlign: 'middle', marginRight: '8px' }} />Question</label>
+                                                <RichTextToolbar 
+                                                    onFormat={handleFormat} 
+                                                    onSaveRange={handleSaveRange} 
+                                                    activeCommands={getToolbarActiveCommands(setQuestionText)} 
+                                                />
+                                                <div 
+                                                    contentEditable="true" 
+                                                    className={questionText?'content-editable-area':'content-editable-area placeholder-active'} 
+                                                    data-placeholder="Enter question text..." 
+                                                    onBlur={e=>handleContentChange(e,setQuestionText)} 
+                                                    onFocus={e=>handleFocus(e,setQuestionText)} 
+                                                    onKeyUp={handleSaveRange} 
+                                                    onMouseUp={handleSaveRange} 
+                                                    dangerouslySetInnerHTML={{__html:questionText}}
+                                                />
+                                            </div>
+
+                                            {/* Choices - Reused from Encoding Tab */}
+                                            <div className="choices-grid">
+                                                {['A','B','C','D'].map((ch,index)=>{
+                                                    const setter=[setChoiceA,setChoiceB,setChoiceC,setChoiceD][index];
+                                                    const content=[choiceA,choiceB,choiceC,choiceD][index];
+                                                    return (
+                                                        <div className="choice-block" key={ch}>
+                                                            <label>Choice {ch}</label>
+                                                            <RichTextToolbar 
+                                                                onFormat={handleFormat} 
+                                                                onSaveRange={handleSaveRange} 
+                                                                activeCommands={getToolbarActiveCommands(setter)} 
+                                                            />
+                                                            <div 
+                                                                contentEditable="true" 
+                                                                className={content?'content-editable-area':'content-editable-area placeholder-active'} 
+                                                                data-placeholder={`Enter choice ${ch}...`} 
+                                                                onBlur={e=>handleContentChange(e,setter)} 
+                                                                onFocus={e=>handleFocus(e,setter)} 
+                                                                onKeyUp={handleSaveRange}
+                                                                onMouseUp={handleSaveRange}
+                                                                dangerouslySetInnerHTML={{__html:content}}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {/* Answer Key - Reused from Encoding Tab */}
+                                            <div className="answer-key-section">
+                                                <div className="correct-answer-field">
+                                                    <input type="text" placeholder="Correct Answer (A, B, C, or D)" value={correctAnswer} onChange={e=>setCorrectAnswer(e.target.value.toUpperCase())} maxLength={1}/>
+                                                </div>
+                                                <div className="answer-key-description">
+                                                    <RichTextToolbar 
+                                                        onFormat={handleFormat} 
+                                                        onSaveRange={handleSaveRange} 
+                                                        activeCommands={getToolbarActiveCommands(setExplanation)} 
+                                                    />
+                                                    <div 
+                                                        contentEditable="true" 
+                                                        className={explanation?'content-editable-area':'content-editable-area placeholder-active'} 
+                                                        data-placeholder="Answer Key Explanation..." 
+                                                        onBlur={e=>handleContentChange(e,setExplanation)} 
+                                                        onFocus={e=>handleFocus(e,setExplanation)} 
+                                                        onKeyUp={handleSaveRange}
+                                                        onMouseUp={handleSaveRange}
+                                                        dangerouslySetInnerHTML={{__html:explanation}}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <hr className="section-separator" />
+                                            
+                                            {/* Action Button - Reused from Encoding Tab */}
+                                            <div className="action-buttons list-actions single-button">
+                                                <button 
+                                                    className="btn-save" 
+                                                    onClick={handleAction}>
+                                                    <Save size={20}/> 
+                                                    Save Changes
+                                                </button>
+                                            </div>
+                                        </div>
                                     )}
                                 </>
                             ) : (
