@@ -78,6 +78,11 @@
     z-index: 0;
 }
 
+/* 🚀 FIX: Ensure the absolutely positioned background element is dark in dark mode 🚀 */
+.background.dark {
+    background-color: #12254d;
+}
+
 .main-container {
     position: relative;
     z-index: 10;
@@ -1220,6 +1225,17 @@
     background-color: #1e293b;
 }
 
+/* --- NEW STYLES FOR TOTAL ENCODED PROGRESS BAR --- */
+.aesthetic-progress-fill.total-stats-progress {
+    /* Use the primary color for the total count bar */
+    background-color: var(--primary-color);
+}
+
+.total-stats .achieved-percent {
+    /* Use the primary color for the percentage text */
+    color: var(--primary-color); 
+}
+/* --- END TOTAL STATS STYLES --- */
 
 .data-summary-block h3 {
     margin-top: 0;
@@ -1262,6 +1278,19 @@
     flex-direction: column;
     justify-content: space-between;
 }
+
+/* 🚀 NEW: Style for the Total Encoded Count (made larger) 🚀 */
+.total-stats-count {
+    font-size: 1.8em; /* Increased size */
+    font-weight: bold;
+    color: var(--primary-color); /* Use primary color for emphasis */
+    margin: 10px 0;
+    text-align: center;
+}
+.dashboard.dark .total-stats-count {
+    color: var(--secondary-color); /* Use secondary color in dark mode */
+}
+/* 🚀 END NEW STYLE 🚀 */
 
 /* --- NEW BLOOM'S CARD STYLING --- */
 

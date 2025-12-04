@@ -47,6 +47,9 @@ const MATH_SYMBOLS = [
     '√', '³√', '⁄',
     '°', '⊥', '∠', '∆', 
 ];
+
+// NEW CONSTANT: Mock target for the overall number of questions per topic (Kept for calculation only)
+const TARGET_TOTAL_COUNT = 50; 
 // -----------------
 
 
@@ -246,8 +249,8 @@ const TestEncodingAndEditing = () => {
     const [explanation, setExplanation] = useState('');
     const [correctAnswer, setCorrectAnswer] = useState(''); 
 
-    const [editingQuestion, setEditingQuestion] = useState(null); // Used for Encoding Tab
-    const [editingQuestionInEditingTab, setEditingQuestionInEditingTab] = useState(null); // Used for Editing Tab
+    // Used for all editing, regardless of the tab where the edit button was clicked
+    const [editingQuestionInEditingTab, setEditingQuestionInEditingTab] = useState(null); 
     
 
     // --- Effects & Handlers ---
@@ -261,7 +264,6 @@ const TestEncodingAndEditing = () => {
         setChoiceD('');
         setExplanation('');
         setCorrectAnswer(''); 
-        setEditingQuestion(null);
         setEditingQuestionInEditingTab(null); 
         
         // Clear contentEditable divs visually
@@ -276,7 +278,11 @@ const TestEncodingAndEditing = () => {
                 setSubject('');
                 setTopicDescription('');
             }
-            setQuestionType(''); 
+            // Preserve questionType if switching between encoding/editing tabs
+            // Otherwise, reset if switching to a non-encoding tab
+            if (!['Test Question Encoding', 'Test Question Editing'].includes(item)) {
+                 setQuestionType(''); 
+            }
             resetInputContent();
         }
         setActiveTab(item);
@@ -516,29 +522,28 @@ const TestEncodingAndEditing = () => {
     
     // Loads question data into input fields
     const handleEditQuestion = (question) => {
-        // Preserve current filter values
+        // 1. Preserve current filter values
         const currentSubject = question.subject;
         const currentTopic = question.topic;
 
-        // Clear content state first to prevent brief flicker/mixup
+        // 2. Clear content state first to prevent brief flicker/mixup
         resetInputContent(); 
         
-        // Determine where to set the editing context
-        if (activeTab === 'Test Question Editing') {
-            // Set the local editing state for the Editing tab, and DO NOT switch tabs
-            setEditingQuestionInEditingTab(question); 
-        } else {
-            // If in Encoding, switch to Encoding tab (this is the original functionality)
-            handleSetActiveTab('Test Question Encoding'); 
-            setEditingQuestion(question);
-        }
+        // 3. Determine where to set the editing context and tab
+        if (activeTab === 'Test Question Encoding') {
+            // USER REQUEST: If in Encoding, switch to Editing tab
+            handleSetActiveTab('Test Question Editing'); 
+        } 
         
-        // Populate the filter/type fields for the input form
+        // Set the editing state, regardless of the tab we just switched to/stayed on
+        setEditingQuestionInEditingTab(question); 
+        
+        // 4. Populate the filter/type fields for the input form
         setSubject(currentSubject);
         setTopicDescription(currentTopic);
         setQuestionType(question.type); 
         
-        // Populate the content fields with the question data
+        // 5. Populate the content fields with the question data
         setQuestionText(question.text); 
         setChoiceA(question.choiceA); 
         setChoiceB(question.choiceB); 
@@ -557,7 +562,7 @@ const TestEncodingAndEditing = () => {
         }
 
         // Determine the editing context
-        const editingContext = editingQuestion || editingQuestionInEditingTab; 
+        const editingContext = editingQuestionInEditingTab; 
         const wasEditing = !!editingContext; 
         
         // Preserve current filter values
@@ -620,9 +625,7 @@ const TestEncodingAndEditing = () => {
             setQuestions(updatedQuestions);
             
             // 3. Check if the deleted question was the one currently being edited
-            const editingContext = editingQuestion || editingQuestionInEditingTab;
-
-            if (editingContext && editingContext.id === questionId) {
+            if (editingQuestionInEditingTab && editingQuestionInEditingTab.id === questionId) {
                 resetInputContent(); // Clear the form if the deleted question was active
             }
 
@@ -656,11 +659,16 @@ const TestEncodingAndEditing = () => {
         
         const getPercent = (c)=>totalQuestions>0?((c/totalQuestions)*100).toFixed(1):0;
         const bloomData = [
-            {level:'Remembering and Understanding', count:counts['Remembering and Understanding'], achieved:getPercent(counts['Remembering and Understanding']), target:30},
-            {level:'Applying and Analyzing', count:counts['Applying and Analyzing'], achieved:getPercent(counts['Applying and Analyzing']), target:30},
-            {level:'Evaluation and Creating', count:counts['Evaluation and Creating'], achieved:getPercent(counts['Evaluation and Creating']), target:40},
+            // Target percentages for clamping the visual bar width
+            {level:'Remembering and Understanding', count:counts['Remembering and Understanding'], achieved:getPercent(counts['Remembering and Understanding']), target:30, colorClass:'color-1'},
+            {level:'Applying and Analyzing', count:counts['Applying and Analyzing'], achieved:getPercent(counts['Applying and Analyzing']), target:30, colorClass:'color-2'},
+            {level:'Evaluation and Creating', count:counts['Evaluation and Creating'], achieved:getPercent(counts['Evaluation and Creating']), target:40, colorClass:'color-3'},
         ];
-        return { totalQuestions, bloomData };
+        
+        // Overall Percentage reflects the 100% distribution total of question types.
+        const distributionTotalPercentage = totalQuestions > 0 ? 100.0.toFixed(1) : 0.0.toFixed(1);
+
+        return { totalQuestions, bloomData, distributionTotalPercentage };
     }, []);
 
     const summary = computeDataSummary(filteredQuestions);
@@ -762,11 +770,11 @@ const TestEncodingAndEditing = () => {
                             
                             <hr className="section-separator" /> {/* Separator after the 3-column selector */}
 
-                            {/* Editing Notification */}
-                            {editingQuestion && (
+                            {/* Editing Notification - Now refers to the Editing tab state */}
+                            {editingQuestionInEditingTab && activeTab === 'Test Question Encoding' && (
                                 <div className="editing-notification">
                                     <Edit2 size={20} style={{ marginRight: '10px' }} />
-                                    You are currently **EDITING** Question ID: **{editingQuestion.id}** for **{subject}** - **{topicDescription}** ({questionType}).
+                                    You are currently **EDITING** Question ID: **{editingQuestionInEditingTab.id}** for **{subject}** - **{topicDescription}** ({questionType}).
                                 </div>
                             )}
 
@@ -775,21 +783,35 @@ const TestEncodingAndEditing = () => {
                                 <div className="data-summary-block separate-blooms-view">
                                     <h3 className="data-summary-heading">Data Summary for **{topicDescription}**</h3> 
                                     <div className="summary-details-grid three-col-blooms">
-                                        <div className="summary-card total-stats">
-                                            <h4>Total Encoding Status</h4>
-                                            <p>Total Questions Encoded: <span style={{fontWeight:'bold'}}>{summary.totalQuestions}</span></p>
-                                            <div className="total-bar-check">Overall Coverage: <span style={{fontWeight:'bold'}}>{summary.totalQuestions>0?100:0}%</span></div>
+                                        
+                                        {/* NEW: Total Encoded Percentage Card (MODIFIED to show 100% distribution total) */}
+                                        <div className="summary-card total-stats color-4">
+                                            <h4>Total Encoded Questions</h4>
+                                            <div className="bloom-progress-info">
+                                                {/* Displaying Total Count and 100% Distribution Percentage */}
+                                                <span className="achieved-percent">Total Encoded: <span style={{fontWeight:'bold'}}>{summary.totalQuestions}</span> Questions ({summary.distributionTotalPercentage}%)</span>
+                                            </div>
+                                            <div className="aesthetic-progress-bar-container compact">
+                                                {/* Bar width reflects 100% distribution if questions exist */}
+                                                <div className="aesthetic-progress-fill total-stats-progress" style={{width:`${summary.distributionTotalPercentage}%`}}></div>
+                                            </div>
                                         </div>
+                                        
+                                        {/* Individual Bloom's Levels */}
                                         {summary.bloomData.map((data,index)=>(
-                                            <div key={index} className={`summary-card bloom-card color-${index+1}`}>
+                                            <div key={index} className={`summary-card bloom-card ${data.colorClass}`}>
                                                 <h4 className="bloom-card-title">{data.level}</h4>
                                                 <p className="bloom-card-count"><span style={{fontWeight:'bold'}}>{data.count}</span> Questions</p>
                                                 <div className="bloom-progress-info">
                                                     <span className="achieved-percent">Achieved: <span style={{fontWeight:'bold'}}>{data.achieved}%</span></span>
-                                                    <span className="target-percent">Target: {data.target}%</span>
+                                                    {/* Target percentage removed as requested */}
                                                 </div>
                                                 <div className="aesthetic-progress-bar-container compact">
-                                                    <div className={`aesthetic-progress-fill color-${index+1} ${data.achieved>=data.target?'over-target':'under-target'}`} style={{width:`${Math.min(data.achieved,100)}%`}}></div>
+                                                    <div 
+                                                        className={`aesthetic-progress-fill ${data.colorClass} ${data.achieved>=data.target?'over-target':'under-target'}`} 
+                                                        // CLAMPING IMPLEMENTED: The bar width is capped at the target percentage (e.g., 30%)
+                                                        style={{width:`${Math.min(parseFloat(data.achieved), data.target)}%`}}
+                                                    ></div>
                                                 </div>
                                             </div>
                                         ))}
@@ -881,10 +903,10 @@ const TestEncodingAndEditing = () => {
                             {/* Action Button (Dynamic Label) */}
                             <div className="action-buttons list-actions single-button">
                                 <button 
-                                    className={editingQuestion ? "btn-save" : "btn-add"} 
+                                    className={editingQuestionInEditingTab ? "btn-save" : "btn-add"} 
                                     onClick={handleAction}>
-                                    {editingQuestion ? <Save size={20}/> : <Plus size={20}/>} 
-                                    {editingQuestion ? 'Save Changes' : 'Add Question'}
+                                    {editingQuestionInEditingTab ? <Save size={20}/> : <Plus size={20}/>} 
+                                    {editingQuestionInEditingTab ? 'Save Changes' : 'Add Question'}
                                 </button>
                             </div>
                             
@@ -917,14 +939,12 @@ const TestEncodingAndEditing = () => {
                                                                         <button 
                                                                             className="action-edit" 
                                                                             title="Edit" 
-                                                                            // Uses the unified handler
                                                                             onClick={() => handleEditQuestion(q)}>
                                                                             <Edit2 size={16} />
                                                                         </button>
                                                                         <button 
                                                                             className="action-delete" 
                                                                             title="Delete" 
-                                                                            // 💥 UPDATED CALL 💥
                                                                             onClick={() => handleDeleteQuestion(q.id)}>
                                                                             <Trash2 size={16} />
                                                                         </button>
@@ -1010,7 +1030,6 @@ const TestEncodingAndEditing = () => {
                                                                             <button 
                                                                                 className="action-delete" 
                                                                                 title="Delete" 
-                                                                                // 💥 UPDATED CALL 💥
                                                                                 onClick={() => handleDeleteQuestion(q.id)}>
                                                                                 <Trash2 size={16} />
                                                                             </button>
