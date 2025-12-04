@@ -335,6 +335,11 @@
     color: #fff;
 }
 
+/* FIX APPLIED HERE */
+.dashboard.dark .user-dropdown button {
+    color: #E5E5E5; /* Ensures the button text is visible and light in dark mode */
+}
+
 .dashboard.dark .user-dropdown button:hover {
     background-color: #FFC63E;
     color: #1C4DA1;
@@ -470,13 +475,15 @@
     color: #1C4DA1;
 }
 
+/* 🔄 UPDATED: Change confirmation button to blue/primary color */
 .btn-confirm {
-    background: #dc3545;
+    background: var(--primary-color, #1C4DA1);
     color: white;
 }
 
 .btn-confirm:hover {
-    background: #c82333;
+    /* Slightly darker blue on hover */
+    background: #163C7B; 
     transform: translateY(-1px);
 }
 
@@ -491,13 +498,17 @@
     color: #1C4DA1;
 }
 
+/* 🔄 UPDATED: Change confirmation button to dark primary color */
 .logout-modal.dark .btn-confirm {
-    background: #e65261;
+    background: var(--dark-primary-color, #4A90E2);
+    color: white;
 }
 
 .logout-modal.dark .btn-confirm:hover {
-    background: #dc3545;
+    /* Slightly darker dark primary blue on hover */
+    background: #3B72B5; 
 }
+/* --- Logout Modal Styles End --- */
 
 /* ======================================= */
 /* II. CUSTOM STYLES FOR ENCODING/EDITING */
@@ -914,9 +925,7 @@
 /* Answer Key Section */
 .answer-key-section {
     display: grid;
-    /* --- MODIFIED FOR VERTICAL ALIGNMENT --- */
-    grid-template-columns: 1fr; 
-    /* --- END MODIFIED --- */
+    grid-template-columns: 1fr 2fr;
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -1523,4 +1532,31 @@
 }
 .dark .question-editing-list .actions-cell button:hover {
     background-color: var(--dark-background-hover);
+}
+
+/* ======================================= */
+/* V. LOGOUT BUTTON RED STYLES (UPDATED TEXT COLOR ONLY) */
+/* ======================================= */
+
+.user-dropdown .logout-btn {
+    /* Set the text color to red/danger in light mode */
+    color: var(--color-red, #dc3545); 
+    background: transparent; /* Ensure no change to the button's background */
+}
+
+.user-dropdown .logout-btn:hover {
+    /* Keep the hover background color but ensure text color remains red */
+    color: #c82333; /* Slightly darker red on hover for contrast */
+}
+
+/* Dark Mode Override for Logout Button */
+.dashboard.dark .user-dropdown .logout-btn {
+    /* Set the text color to red/danger in dark mode */
+    color: #e65261; /* Slightly lighter red for better dark mode contrast */
+    background: transparent; /* Ensure no change to the button's background */
+}
+
+.dashboard.dark .user-dropdown .logout-btn:hover {
+    /* Ensure text color remains red/danger on hover in dark mode */
+    color: var(--color-red, #dc3545); 
 }
